@@ -5,7 +5,7 @@
 
 services:
   mcp-dncp:
-    image: ghcr.io/<owner>/<repo>:latest   # ← reemplazar
+    image: ricarcya/mcp-contrataciones-py:latest   # Docker Hub (alternativa: ghcr.io/ricarcya/mcp-contrataciones-py)
     build: .
     environment:
       # Opcional: sin token funciona en modo testing (15 llamadas/min).

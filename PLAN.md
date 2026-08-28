@@ -11,9 +11,10 @@
 - API v3 verificada en vivo: base `https://www.contrataciones.gov.py/datos/api/v3/doc/`, 30 endpoints, spec `swagger.json` descargada.
 - No existe MCP standalone para DNCP → hueco confirmado. Referencias: SIGECOP (auth Python), secop-mcp-server (estructura MCP Python), mcp-india-tenders (arquitectura OCDS).
 
-## Fase 1 — Scaffold del MCP server (PENDIENTE)
+## Fase 1 — Scaffold del MCP server (✅ COMPLETADA)
 
-- Lenguaje: **Python** (confirmar) con SDK `mcp` (o `fastmcp`).
+- Lenguaje: **Python** con SDK `mcp` v1 (FastMCP; pin `mcp<2`).
+- 17 tools implementadas, cliente con auth opcional (`DNCP_REQUEST_TOKEN`), tests (7) y ruff OK, validada contra la API real (1467 procesos).
 - Estructura:
   ```
   src/mcp_dncp/
@@ -39,14 +40,25 @@
 - Auth opcional: sin token → modo testing (15 calls/min); con env `DNCP_REQUEST_TOKEN` → OAuth real.
 - Tests: pytest (mock de respuestas), ruff.
 
-## Fase 2 — Docker (✅ ARCHIVOS GENERADOS, validar con código real)
+## Fase 2 — Docker (✅ COMPLETADA)
+
+- `Dockerfile` multi-stage validado localmente y en CI (build check 24s).
+- Imagen publicada: `ghcr.io/ricarcya/mcp-contrataciones-py:latest` (amd64+arm64), handshake MCP verificado desde el contenedor.
 
 - `Dockerfile` multi-stage (builder wheels + runtime slim, usuario no-root, `PYTHONUNBUFFERED`).
 - Transporte: stdio por defecto (`ENTRYPOINT mcp run`); alternativa HTTP streamable (EXPOSE 8080) documentada.
 - `.dockerignore` + `docker-compose.yml` de ejemplo (env `DNCP_REQUEST_TOKEN`).
 - Validar local: `docker build -t mcp-dncp:test .`
 
-## Fase 3 — GitHub + CI/CD automatizado (PENDIENTE de decisiones)
+## Fase 3 — GitHub + CI/CD automatizado (✅ COMPLETADA)
+
+1. Repo público creado y pusheado: **https://github.com/ricarcya/mcp-contrataciones-py**
+2. `.github/workflows/ci.yml` — lint + tests + build check: verde en cada push/PR.
+3. `.github/workflows/docker-build.yml` — buildx multi-arch + push a **GHCR** automatizado:
+   - push a `main` → tag `latest` ✅ (verificado)
+   - tag `v*` (semver) → tags `v1.2.3`, `v1`, `1.2` (pendiente primer release)
+   - `workflow_dispatch` manual con tag opcional
+   - cache GHA + provenance/SBOM; sin secrets extra (GITHUB_TOKEN)
 
 1. Crear repo (gh) → push del código.
 2. `.github/workflows/ci.yml` — lint + tests en PR/main.
@@ -66,7 +78,8 @@
 
 ---
 
-## Decisiones pendientes
-- [ ] Stack: Python (recomendado) vs TypeScript
-- [ ] Nombre del repo + visibilidad (público/privado) + owner (personal / org Easy)
-- [ ] Autenticar `gh` (device flow) para crear repo y push
+## Decisiones (resueltas)
+- [x] Stack: Python
+- [x] Repo: `mcp-contrataciones-py` · público · owner ricarcya
+- [x] gh autenticado (ricarcya) + repo creado y pusheado
+- [ ] Pendiente: release v0.1.0 (tag), PyPI, registro mcpmarket/glama, `hermes mcp add` local

@@ -70,10 +70,11 @@ Para obtener el token: registrarse en https://www.contrataciones.gov.py/datos/ad
 
 ## Docker
 
-Imagen publicada en **GHCR** (build automático vía GitHub Actions, multi-arch amd64/arm64):
+Imagen publicada en **GHCR** y **Docker Hub** (build automático vía GitHub Actions, multi-arch amd64/arm64):
 
 ```bash
-docker pull ghcr.io/<owner>/mcp-contrataciones-py:latest
+docker pull ricarcya/mcp-contrataciones-py:latest        # Docker Hub
+docker pull ghcr.io/ricarcya/mcp-contrataciones-py:latest # GHCR
 ```
 
 **stdio** (el cliente MCP lanza el contenedor):
