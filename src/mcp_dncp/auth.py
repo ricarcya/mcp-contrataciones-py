@@ -8,6 +8,7 @@ que este módulo renueva automáticamente antes de que expire.
 
 from __future__ import annotations
 
+import base64
 import os
 import time
 
@@ -17,11 +18,34 @@ OAUTH_URL = "https://www.contrataciones.gov.py/datos/api/v3/doc/oauth/token"
 ACCESS_TOKEN_TTL = 15 * 60  # segundos; el access token expira a los 15 min
 
 
+def _normalize_request_token(token: str) -> str:
+    """El portal muestra el request token como base64('<consumer_key>:<consumer_secret>').
+
+    Al copiarlo suele perderse el padding final ('=='), lo que hace que el servidor
+    responda 401 'request_token does not match'. Esta función recompone la forma
+    canónica: rellena el padding y, si decodifica a <uuid>:<uuid>, re-emite el base64
+    exacto que espera la API.
+    """
+    t = token.strip()
+    if len(t) % 4:
+        t += "=" * (4 - len(t) % 4)
+    try:
+        decoded = base64.b64decode(t, validate=True)
+        text = decoded.decode("ascii")
+        key, _, secret = text.partition(":")
+        if len(key) == 36 and len(secret) == 36:
+            return base64.b64encode(f"{key}:{secret}".encode()).decode()
+    except (ValueError, UnicodeDecodeError):
+        pass
+    return t
+
+
 class DncpAuth:
     """Maneja el request_token → access_token con cache y renovación."""
 
     def __init__(self, request_token: str | None = None, client: httpx.Client | None = None):
-        self.request_token = request_token or os.environ.get("DNCP_REQUEST_TOKEN")
+        raw = request_token or os.environ.get("DNCP_REQUEST_TOKEN") or ""
+        self.request_token = _normalize_request_token(raw)
         self._client = client or httpx.Client(timeout=30.0)
         self._access_token: str | None = None
         self._expires_at: float = 0.0

@@ -43,7 +43,7 @@
 ## Fase 2 — Docker (✅ COMPLETADA)
 
 - `Dockerfile` multi-stage validado localmente y en CI (build check 24s).
-- Imagen publicada: `ghcr.io/ricarcya/mcp-contrataciones-py:latest` (amd64+arm64), handshake MCP verificado desde el contenedor.
+- Imagen publicada en **GHCR** y **Docker Hub**: `ghcr.io/ricarcya/mcp-contrataciones-py:latest` y `docker.io/ricarcya/mcp-contrataciones-py:latest` (ambas amd64+arm64), handshake MCP verificado desde el contenedor.
 
 - `Dockerfile` multi-stage (builder wheels + runtime slim, usuario no-root, `PYTHONUNBUFFERED`).
 - Transporte: stdio por defecto (`ENTRYPOINT mcp run`); alternativa HTTP streamable (EXPOSE 8080) documentada.
