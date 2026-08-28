@@ -1,0 +1,19 @@
+# Ejemplo de uso de la imagen publicada en GHCR.
+# Transporte stdio: el contenedor se ejecuta como subproceso del cliente MCP
+# (config del cliente apunta al comando docker). Para transporte HTTP
+# streamable, usar el perfil `http` y exponer el puerto 8080.
+
+services:
+  mcp-dncp:
+    image: ghcr.io/<owner>/<repo>:latest   # ← reemplazar
+    build: .
+    environment:
+      # Opcional: sin token funciona en modo testing (15 llamadas/min).
+      # Con token OAuth de https://www.contrataciones.gov.py/datos/adm/login
+      DNCP_REQUEST_TOKEN: ${DNCP_REQUEST_TOKEN:-}
+    # Transporte HTTP streamable:
+    # profiles: ["http"]
+    # ports:
+    #   - "8080:8080"
+    # command: ["python", "-m", "mcp_dncp.server", "--transport", "http", "--port", "8080"]
+    restart: unless-stopped
