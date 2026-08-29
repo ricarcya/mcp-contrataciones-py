@@ -74,7 +74,7 @@
 
 - README con: instalación (`pip install` / `uvx`), config en Claude Desktop/Hermes (stdio y/o HTTP), uso de la imagen Docker.
 - Registrar en directorios MCP (mcpmarket, glama, mcp.so) — hueco de "Paraguay DNCP" ya indexado por Pipeworx.
-- Registrar en Hermes local (skill `hermes-custom-mcp`) para usarlo desde esta máquina.
+- ✅ **Registrado en Hermes local** (manifest `optional-mcps/mcp-contrataciones-py/`, 17 tools, env `DNCP_REQUEST_TOKEN` OAuth real con renovación automática; verificado con `verify_mcp_server.py`). Reiniciar Hermes para cargar las tools.
 
 ---
 

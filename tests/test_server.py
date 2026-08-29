@@ -39,3 +39,26 @@ def test_buscar_procesos_con_ocid_ok(monkeypatch):
 
     monkeypatch.setattr(server, "get_client", lambda: FakeClient())
     assert server.buscar_procesos(ocid="ocds-03ad3f-487119-1") == {"records": []}
+
+
+def test_normalizar_estado_alias():
+    # alias del portal -> valor real de la API
+    assert server._normalizar_estado("Publicado") == "En Convocatoria (Abierta)"
+    assert server._normalizar_estado("EN PLAZO") == "En Convocatoria (Abierta)"
+    assert server._normalizar_estado("en convocatoria (abierta)") == "En Convocatoria (Abierta)"
+    # valores reales pasan intactos
+    assert server._normalizar_estado("Adjudicada") == "Adjudicada"
+    assert server._normalizar_estado("Anulada o Cancelada") == "Anulada o Cancelada"
+    # valores desconocidos se envían tal cual
+    assert server._normalizar_estado("Estado inventado") == "Estado inventado"
+    assert server._normalizar_estado(None) is None
+
+
+def test_buscar_procesos_mapea_estado_publicado(monkeypatch):
+    class FakeClient:
+        def search_processes(self, **filters):
+            assert filters["tender.statusDetails"] == "En Convocatoria (Abierta)"
+            return {"records": []}
+
+    monkeypatch.setattr(server, "get_client", lambda: FakeClient())
+    assert server.buscar_procesos(estado="Publicado", titulo="web") == {"records": []}

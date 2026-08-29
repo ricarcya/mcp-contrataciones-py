@@ -68,6 +68,12 @@ Para obtener el token: registrarse en https://www.contrataciones.gov.py/datos/ad
 | `buscar_intenciones` | Intenciones de contratación |
 | `resumen_licitaciones` / `contar_licitaciones` | Visualizaciones minimal / conteos |
 
+> **Nota sobre `estado` en `buscar_procesos`:** la API usa `tender.statusDetails` con valores
+> exactos: `En Convocatoria (Abierta)` (llamado abierto a ofertas), `En Evaluacion (Cerrada)`,
+> `Adjudicada`, `Desierta`, `Anulada o Cancelada`, `Precalificado`. La herramienta acepta alias
+> del portal (`Publicado`, `En Plazo` → `En Convocatoria (Abierta)`). Un valor inválido hace que
+> la API responda `HTTP 404 "No encontrado"` (error genérico, no de ruta).
+
 ## Docker
 
 Imagen publicada en **GHCR** y **Docker Hub** (build automático vía GitHub Actions, multi-arch amd64/arm64):

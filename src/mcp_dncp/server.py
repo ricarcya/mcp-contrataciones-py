@@ -107,6 +107,34 @@ def obtener_convocante(id_convocante: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------- #
 # Búsquedas
 # ---------------------------------------------------------------------- #
+# Valores reales de tender.statusDetails en la API v3. La API responde
+# HTTP 404 "No encontrado" (error genérico, no de ruta) si el valor no es
+# exactamente uno de los válidos. Los alias permiten usar los nombres del
+# portal ("Publicado", "En Plazo") para referirse a un llamado abierto.
+_ESTADO_ALIASES: dict[str, str] = {
+    "publicado": "En Convocatoria (Abierta)",
+    "en plazo": "En Convocatoria (Abierta)",
+    "en plazo de presentacion de ofertas": "En Convocatoria (Abierta)",
+    "en convocatoria": "En Convocatoria (Abierta)",
+    "en convocatoria (abierta)": "En Convocatoria (Abierta)",
+    "abierta": "En Convocatoria (Abierta)",
+    "en evaluacion": "En Evaluacion (Cerrada)",
+    "en evaluacion (cerrada)": "En Evaluacion (Cerrada)",
+    "adjudicada": "Adjudicada",
+    "desierta": "Desierta",
+    "precalificado": "Precalificado",
+    "anulada": "Anulada o Cancelada",
+    "cancelada": "Anulada o Cancelada",
+    "anulada o cancelada": "Anulada o Cancelada",
+}
+
+
+def _normalizar_estado(estado: str | None) -> str | None:
+    if estado is None:
+        return None
+    return _ESTADO_ALIASES.get(estado.strip().lower(), estado)
+
+
 @mcp.tool()
 @_handle_errors
 def buscar_procesos(
@@ -126,9 +154,17 @@ def buscar_procesos(
 ) -> dict[str, Any]:
     """Busca procesos de contratación pública con filtros del estándar OCDS.
 
-    Se requiere al menos un filtro. Fechas en formato YYYY-MM-DD. tipo_fecha puede ser
-    'entrega_ofertas', 'adjudicacion', 'publicacion' u otros valores del parámetro
-    'tipo_fecha' de la API. Devuelve record package OCDS con paginación.
+    Se requiere al menos un filtro. Fechas en formato YYYY-MM-DD.
+    tipo_fecha válidos: 'entrega_ofertas', 'adjudicacion', 'publicacion_llamado',
+    'firma_contrato', 'fecha_release'.
+
+    estado (tender.statusDetails) acepta alias del portal: 'Publicado' o 'En Plazo'
+    se traducen a 'En Convocatoria (Abierta)' (llamado abierto a ofertas).
+    Otros valores reales: 'En Evaluacion (Cerrada)', 'Adjudicada', 'Desierta',
+    'Anulada o Cancelada', 'Precalificado'. Ojo: un valor inválido hace que la API
+    responda HTTP 404 "No encontrado" (error genérico, no de ruta).
+
+    Devuelve record package OCDS con paginación.
     """
     filters: dict[str, Any] = {
         "ocid": ocid,
@@ -138,7 +174,7 @@ def buscar_procesos(
         "awards.suppliers.id": ruc_proveedor,
         "tender.items.classification.id": categoria,
         "tender.procurementMethodDetails": modalidad,
-        "tender.statusDetails": estado,
+        "tender.statusDetails": _normalizar_estado(estado),
         "tipo_fecha": tipo_fecha,
         "fecha_desde": fecha_desde,
         "fecha_hasta": fecha_hasta,

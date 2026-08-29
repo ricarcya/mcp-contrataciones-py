@@ -23,7 +23,7 @@ class DncpClient:
     def __init__(
         self,
         base_url: str = BASE_URL,
-        timeout: float = 30.0,
+        timeout: float = 120.0,
         request_token: str | None = None,
         transport: httpx.BaseTransport | None = None,
     ):
